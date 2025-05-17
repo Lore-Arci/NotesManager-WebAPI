@@ -1,0 +1,1 @@
+public record UserRegisterDTO(string name, string surname, string email, string password, bool? isPublic); 

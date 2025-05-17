@@ -16,11 +16,11 @@ public class User
     public string HashedPassword { get; set; }
     public byte[] Salt { get; set; }
     public string? RefreshToken { get; set; }
-    public DateTime RefreshTokenExpiryTime { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
     [JsonIgnore]
-    public virtual ICollection<Note>? Notes { get; set; }
+    public virtual ICollection<Note> Notes { get; set; }
     [JsonIgnore]
-    public virtual ICollection<Review>? Reviews { get; set; }
+    public virtual ICollection<Review> Reviews { get; set; }
     [JsonIgnore] 
     public virtual ICollection<Favourite> Favourites { get; set; }
 }

@@ -1,0 +1,1 @@
+public record TokenDTO(int userId, string refreshToken);
