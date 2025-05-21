@@ -53,11 +53,23 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
         {
             AccessToken = GenerateToken(user),
             RefreshToken = await GenerateAndSaveRefreshToken(user)
-        }; 
+        };
     }
-    
 
-    private string GenerateToken(User user) {
+    public async Task<User> GetUserById(int id)
+    {
+        var user = await db.Users
+            .Include(u => u.Notes)
+            .Include(u => u.Reviews)
+            .Include(u => u.Favourites)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user is null) return null;
+        return user;
+    }
+
+    private string GenerateToken(User user)
+    {
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -83,7 +95,8 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
     }
 
     // Called when the user logs in for the first time, updating the expiry time
-    private async Task<string> GenerateAndSaveRefreshToken(User user) {
+    private async Task<string> GenerateAndSaveRefreshToken(User user)
+    {
         var refreshToken = await GetRefreshToken(user);
         var expiryTime = DateTime.UtcNow.AddDays(7);
         user.RefreshTokenExpiryTime = expiryTime;
@@ -91,8 +104,9 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
         return refreshToken;
     }
 
-     // Called when the access token expires, so the user will also get a new refresh token but the expiry time will not change
-    private async Task<string> GetRefreshToken(User user) {
+    // Called when the access token expires, so the user will also get a new refresh token but the expiry time will not change
+    private async Task<string> GetRefreshToken(User user)
+    {
         var rng = RandomNumberGenerator.Create();
         var randomNumber = new byte[32];
         rng.GetBytes(randomNumber);
@@ -102,13 +116,25 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
         return refreshToken;
     }
 
-    public async Task<Token> RefreshTokenAsync(TokenDTO tokenRequest) {
+    public async Task<Token> RefreshTokenAsync(TokenDTO tokenRequest)
+    {
         var user = await ValidateRefreshTokenAsync(tokenRequest.userId, tokenRequest.refreshToken);
         if (user is null) return null;
-        return new Token {
+        return new Token
+        {
             AccessToken = GenerateToken(user),
             RefreshToken = await GetRefreshToken(user)
         };
+    }
+
+    public async Task<User> ChangeProfileVisibility(int id)
+    {
+        var user = await db.Users.FindAsync(id);
+        if (user is null) return null;
+
+        user.isPublic = !user.isPublic;
+        await db.SaveChangesAsync();
+        return user;
     }
 
     private async Task<User?> ValidateRefreshTokenAsync(int userId, string refreshToken)
@@ -120,7 +146,7 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
         }
 
         return user;
-    } 
+    }
 
     private byte[] GenerateSalt()
     {
@@ -144,7 +170,8 @@ public class AuthService(IConfiguration conf, NotesContext db) : IAuthService
         return Convert.ToBase64String(hash);
     }
 
-    private bool VerifyPassword(string plainTextLogIn, string hashedPasswordStored, byte[] salt) {
+    private bool VerifyPassword(string plainTextLogIn, string hashedPasswordStored, byte[] salt)
+    {
         return HashPassword(plainTextLogIn, salt) == hashedPasswordStored;
     }
 }

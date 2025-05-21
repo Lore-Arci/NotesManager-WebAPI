@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,12 +14,19 @@ builder.Configuration
         .Cast<System.Collections.DictionaryEntry>()
         .ToDictionary(d => (string)d.Key!, d => (string?)d.Value));
 
+builder.Services.Configure<JsonSerializerOptions>(options =>
+{
+    options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    //options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; // Optional: Use camelCase
+    //options.WriteIndented = true; // Optional: Pretty-print JSON
+});
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<INotesService, NotesService>();
 
 builder.Services.AddDbContext<NotesContext>(options =>
 {
@@ -41,7 +50,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT__Key"]!))
     };
-}); 
+});
 
 
 builder.Services.AddSwaggerGen(options =>
@@ -75,6 +84,13 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
+
 
 var app = builder.Build();
 
