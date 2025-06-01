@@ -4,7 +4,7 @@
 
 > WebAPI built with <a href="#">ASP.NET</a> that handles requests from an hypothetical WebAPP as a NotesManager, to a local database managed with MariaDB. 
 
-<img src="Accesso.png"/>
+<img src="./Imgs/Accesso.png"/>
 
 
 ## 📋 List of Content 
