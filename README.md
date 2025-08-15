@@ -72,7 +72,7 @@ git clone https://github.com/Lore-Arci/NotesManager-WebAPI.git
 cd NotesManager-WebAPI
 ```
 
-### 2.  Create the .env File
+### 2. Create the .env File
 ```
 ConnectionStrings__DefaultConnection="server="";port="";database="";user="";password="";
 Pw__Pepper="PepperString"
@@ -87,12 +87,17 @@ JWT__Audience="NotesManagerUsers"
 dotnet restore
 ```
 
-### Update the Database
+### 4. Run the first migration
+``` sh
+dotnet ef migrations add MigrationName
+```
+
+### 5. Update the Database
 ``` sh
 dotnet ef database update
 ```
 
-### 4. Run the WebAPI
+### 6. Run the WebAPI
 ```C#
 // Running with the default profile
 dotnet run
@@ -100,7 +105,7 @@ dotnet run
 dotnet run --launch-profile "https"
 ```
 
-### 5. Access to the WebAPI
+### 7. Access to the WebAPI
 This WebAPI uses Swagger (OpenAPI) for testing endpoints. Once the API is running, access the Swagger UI by navigating to:
 ```
 http://localhost:5202/swagger
